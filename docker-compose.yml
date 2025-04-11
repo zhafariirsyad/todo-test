@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todo_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - appnet
+    ports:
+      - "5435:5432"
+
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8005:8000" # expose to host: container
+    depends_on:
+      - postgres
+    networks:
+      - appnet
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/var/www/html
+    ports:
+      - "8006:8000"
+    networks:
+      - appnet
+    depends_on:
+      - backend
+
+networks:
+  appnet:
+
+volumes:
+  pgdata:
